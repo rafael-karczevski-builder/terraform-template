@@ -7,11 +7,7 @@ resource "google_bigquery_dataset" "_" {
 
   max_time_travel_hours = 168
   labels = {
-    "env"                      = var.environment
-    "project"                  = var.name
-    "goog-dataplex-asset-id"   = local.asset_tier_name
-    "goog-dataplex-lake-id"    = "lake-${var.name}"
-    "goog-dataplex-project-id" = var.project_id
-    "goog-dataplex-zone-id"    = local.zone_tier_name
+    "env"     = var.environment
+    "project" = var.name
   }
 }

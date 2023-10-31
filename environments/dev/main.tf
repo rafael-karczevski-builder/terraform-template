@@ -109,7 +109,7 @@ module "airflow-power-bi" {
 #endregion
 
 #region BigQuery
-module "bronze" {
+module "bq_bronze" {
   source      = "../../modules/big_query"
   environment = "dev"
   name        = var.name
@@ -119,7 +119,7 @@ module "bronze" {
   region = var.region
 }
 
-module "silver" {
+module "bq_silver" {
   source      = "../../modules/big_query"
   environment = "dev"
   name        = var.name
@@ -129,7 +129,7 @@ module "silver" {
   region = var.region
 }
 
-module "gold" {
+module "bq_gold" {
   source      = "../../modules/big_query"
   environment = "dev"
   name        = var.name
@@ -171,13 +171,35 @@ module "datalake" {
 
   zones = [
     {
-      name = "bronze",
-      type = "RAW"
+      name               = "bronze",
+      type               = "RAW",
+      resource_spec_name = "projects/${var.project_id}/datasets/${module.bq_bronze.dataset_id}",
+      resource_spec_type = "BIGQUERY_DATASET",
+      create_inputs      = true,
+      inputs_storage     = "projects/${var.project_id}/buckets/${module.lake-inputs.name}"
     },
     {
-      name = "silver",
-      type = "CURATED"
+      name               = "silver",
+      type               = "CURATED",
+      resource_spec_name = "projects/${var.project_id}/datasets/${module.bq_silver.dataset_id}",
+      resource_spec_type = "BIGQUERY_DATASET",
+      create_inputs      = false,
+      inputs_storage     = ""
+    },
+    {
+      name               = "gold",
+      type               = "CURATED",
+      resource_spec_name = "projects/${var.project_id}/datasets/${module.bq_gold.dataset_id}",
+      resource_spec_type = "BIGQUERY_DATASET",
+      create_inputs      = false,
+      inputs_storage     = ""
     }
+  ]
+
+  depends_on = [
+    module.bq_bronze,
+    module.bq_silver,
+    module.bq_gold
   ]
 }
 #endregion
